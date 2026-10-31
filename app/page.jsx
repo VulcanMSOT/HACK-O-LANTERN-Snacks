@@ -14,6 +14,7 @@ import {
   Plus,
   AlertCircle,
   X,
+  Sparkles,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -135,7 +136,7 @@ export default function SnacksDashboard() {
         throw new Error(data.error || 'Failed to record snack');
       }
 
-      showToast(`Snack given to ${team.name}!`);
+      showToast(`Snack recorded for ${team.name}!`);
       fetchTeams(selectedSlotId);
     } catch (err) {
       alert(err.message);
@@ -225,8 +226,8 @@ export default function SnacksDashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center text-neutral-400 text-sm">
-        Loading snacks session...
+      <div className="min-h-screen bg-[#060606] flex items-center justify-center text-neutral-400 text-sm">
+        <div className="w-6 h-6 border-2 border-[#ff7a1a] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -235,42 +236,52 @@ export default function SnacksDashboard() {
   const percentGiven = stats.total > 0 ? Math.round((stats.given / stats.total) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white pb-20">
+    <div className="min-h-screen bg-[#060606] text-white pb-24 relative overflow-x-hidden">
+      {/* Ambient Lighting */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[280px] bg-gradient-to-b from-[#ff7a1a]/15 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
+
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#ff7a1a] text-black font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg animate-bounce">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#ff7a1a] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-2xl shadow-[#ff7a1a]/40 animate-bounce">
           {toast}
         </div>
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#121212]/90 backdrop-blur-md border-b border-[#222222] px-4 py-3">
+      <header className="sticky top-0 z-30 bg-[#0c0c0c]/85 backdrop-blur-xl border-b border-white/[0.08] px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <span className="font-bold text-[#ff7a1a] text-sm tracking-tight">{'{V}'}</span>
+            <div className="w-8 h-8 rounded-lg bg-[#181818] border border-white/10 flex items-center justify-center font-black text-[#ff7a1a] text-sm shadow-sm">
+              {'{V}'}
+            </div>
             <div>
-              <h1 className="text-xs font-bold uppercase tracking-wider text-white">
-                HACK-O-LANTERN 2026 • Snacks
+              <h1 className="text-xs font-black uppercase tracking-wider text-white">
+                HACK-O-LANTERN 2026
               </h1>
-              <div className="text-[11px] text-neutral-400">
-                Volunteer: <span className="text-white font-medium">{user.name}</span>
-                {user.role === 'admin' && <span className="ml-1 text-[#ff7a1a]">(Admin)</span>}
+              <div className="text-[10px] text-neutral-400 flex items-center space-x-1.5">
+                <span>Volunteer:</span>
+                <span className="text-white font-bold">{user.name}</span>
+                {user.role === 'admin' && (
+                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-[#ff7a1a]/20 text-[#ff7a1a] border border-[#ff7a1a]/40">
+                    Admin
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <a
               href={`/api/snacks/export?slot=${selectedSlotId}`}
               download
-              className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg"
+              className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl border border-transparent hover:border-white/10 transition-colors"
               title="Download CSV"
             >
               <Download className="w-4 h-4" />
             </a>
             <button
               onClick={handleLogout}
-              className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg"
+              className="p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl border border-transparent hover:border-white/10 transition-colors"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
@@ -280,7 +291,7 @@ export default function SnacksDashboard() {
       </header>
 
       {/* Slot Switcher Tabs */}
-      <div className="bg-[#0e0e0e] border-b border-[#1f1f1f] px-4 py-2 sticky top-[57px] z-20">
+      <div className="bg-[#090909] border-b border-white/[0.06] px-4 py-2 sticky top-[53px] z-20">
         <div className="max-w-2xl mx-auto flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
           {slots.map((s) => {
             const isSelected = s.id === selectedSlotId;
@@ -288,10 +299,10 @@ export default function SnacksDashboard() {
               <button
                 key={s.id}
                 onClick={() => setSelectedSlotId(s.id)}
-                className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex-shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   isSelected
-                    ? 'bg-[#ff7a1a] text-black shadow-sm shadow-[#ff7a1a]/30'
-                    : 'bg-[#181818] text-neutral-300 hover:bg-[#202020]'
+                    ? 'bg-[#ff7a1a] text-black shadow-md shadow-[#ff7a1a]/20'
+                    : 'bg-[#141414] text-neutral-300 hover:bg-[#1a1a1a] border border-white/5'
                 }`}
               >
                 {s.name}
@@ -302,7 +313,7 @@ export default function SnacksDashboard() {
           {user.role === 'admin' && (
             <button
               onClick={() => setNewSlotModal(true)}
-              className="flex-shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#181818] text-neutral-400 hover:text-white hover:bg-[#202020] flex items-center space-x-1"
+              className="flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[#141414] text-neutral-400 hover:text-white hover:bg-[#1a1a1a] border border-white/5 flex items-center space-x-1"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Slot</span>
@@ -312,37 +323,38 @@ export default function SnacksDashboard() {
       </div>
 
       <main className="max-w-2xl mx-auto px-4 py-4 space-y-4">
-        {/* Progress Banner */}
-        <div className="p-4 rounded-xl bg-[#141414] border border-[#262626] space-y-3">
+        {/* Progress & Stat Widget */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#121212] to-[#0a0a0a] border border-white/10 space-y-3 shadow-xl">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs uppercase tracking-wider text-neutral-400">
-                {currentSlot?.name || 'Snacks'}
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#ff7a1a]">
+                {currentSlot?.name || 'Snacks Delivery'}
               </div>
-              <div className="text-lg font-bold text-white mt-0.5">
-                Given to <span className="text-[#ff7a1a] font-extrabold">{stats.given}</span> of{' '}
-                {stats.total} teams
+              <div className="text-xl sm:text-2xl font-black text-white mt-0.5 flex items-baseline space-x-1.5">
+                <span>{stats.given}</span>
+                <span className="text-neutral-500 text-sm font-semibold">/ {stats.total} teams</span>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-white">{percentGiven}%</span>
+              <span className="text-2xl sm:text-3xl font-black text-white">{percentGiven}%</span>
+              <div className="text-[10px] text-neutral-400 uppercase font-semibold">Delivered</div>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-[#202020] h-2 rounded-full overflow-hidden">
+          {/* Progress Bar with Glow */}
+          <div className="w-full bg-[#1c1c1c] h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
             <div
-              className="bg-[#ff7a1a] h-full transition-all duration-300"
+              className="bg-gradient-to-r from-[#ff7a1a] to-amber-500 h-full rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(255,122,26,0.5)]"
               style={{ width: `${percentGiven}%` }}
             />
           </div>
         </div>
 
-        {/* Scan & Search Bar */}
+        {/* Scan Button & Quick Search */}
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setScannerOpen(true)}
-            className="flex-shrink-0 inline-flex items-center space-x-2 bg-[#ff7a1a] hover:bg-[#e5680d] active:scale-[0.98] text-black font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-md shadow-[#ff7a1a]/20"
+            className="flex-shrink-0 inline-flex items-center space-x-2 bg-[#ff7a1a] hover:bg-[#e5680d] active:scale-[0.98] text-black font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-[#ff7a1a]/25"
           >
             <QrCode className="w-4 h-4" />
             <span>Scan Pass</span>
@@ -355,13 +367,13 @@ export default function SnacksDashboard() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search team ID or name..."
-              className="w-full bg-[#141414] border border-[#262626] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#ff7a1a]"
+              className="w-full bg-[#121212] border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#ff7a1a] focus:ring-1 focus:ring-[#ff7a1a]/40 transition-all"
             />
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center space-x-1 border-b border-[#1f1f1f] pb-2 text-xs">
+        {/* Segmented Filter Control */}
+        <div className="bg-[#101010] p-1 rounded-xl border border-white/[0.08] flex items-center space-x-1 text-xs">
           {[
             { id: 'all', label: `All (${stats.total})` },
             { id: 'pending', label: `Pending (${stats.pending})` },
@@ -370,9 +382,9 @@ export default function SnacksDashboard() {
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
+              className={`flex-1 py-1.5 rounded-lg font-bold text-center transition-all ${
                 filter === tab.id
-                  ? 'bg-neutral-800 text-white'
+                  ? 'bg-neutral-800 text-white shadow-sm border border-white/10'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -385,7 +397,7 @@ export default function SnacksDashboard() {
         {loading ? (
           <div className="text-center py-12 text-neutral-500 text-xs">Loading teams...</div>
         ) : filteredTeams.length === 0 ? (
-          <div className="p-8 rounded-xl bg-[#121212] border border-[#222222] text-center text-xs text-neutral-500">
+          <div className="p-8 rounded-2xl bg-[#0e0e0e] border border-white/5 text-center text-xs text-neutral-500">
             No teams match the current filter.
           </div>
         ) : (
@@ -395,20 +407,24 @@ export default function SnacksDashboard() {
                 key={team.id}
                 className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                   team.is_given
-                    ? 'bg-[#101010] border-[#1e1e1e] opacity-80'
-                    : 'bg-[#141414] border-[#262626] hover:border-[#ff7a1a]/40'
+                    ? 'bg-[#0d0d0d] border-white/[0.05] opacity-80'
+                    : 'bg-[#121212] border-white/10 hover:border-[#ff7a1a]/40 shadow-sm'
                 }`}
               >
                 <div className="flex-1 min-w-0 mr-2">
                   <div className="flex items-center space-x-2 flex-wrap gap-y-0.5">
-                    <span className="font-mono text-xs font-bold text-[#ff7a1a] flex-shrink-0">{team.id}</span>
-                    <span className="text-xs sm:text-sm font-bold text-white break-words">{team.name}</span>
+                    <span className="font-mono text-xs font-black text-[#ff7a1a] flex-shrink-0 bg-[#ff7a1a]/10 px-1.5 py-0.5 rounded border border-[#ff7a1a]/20">
+                      {team.id}
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-white break-words">
+                      {team.name}
+                    </span>
                   </div>
 
                   <div className="mt-1">
                     {team.is_given ? (
-                      <span className="text-[11px] text-green-400 flex items-center space-x-1 break-words">
-                        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+                      <span className="text-[11px] text-emerald-400 flex items-center space-x-1 break-words font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
                         <span>
                           Given by {team.given_by} at{' '}
                           {new Date(team.given_at).toLocaleTimeString([], {
@@ -418,8 +434,8 @@ export default function SnacksDashboard() {
                         </span>
                       </span>
                     ) : (
-                      <span className="text-[11px] text-neutral-400 flex items-center space-x-1">
-                        <Clock className="w-3 h-3 text-neutral-500 flex-shrink-0" />
+                      <span className="text-[11px] text-neutral-400 flex items-center space-x-1 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
                         <span>Awaiting delivery</span>
                       </span>
                     )}
@@ -431,23 +447,23 @@ export default function SnacksDashboard() {
                     user.role === 'admin' ? (
                       <button
                         onClick={() => setUndoModal(team)}
-                        className="text-[11px] text-neutral-400 hover:text-red-400 p-1.5 rounded-lg border border-[#333] hover:border-red-800 flex items-center space-x-1"
+                        className="text-[11px] text-neutral-400 hover:text-red-400 px-2 py-1 rounded-lg border border-white/10 hover:border-red-800/80 flex items-center space-x-1 transition-colors"
                         title="Admin Undo"
                       >
                         <RotateCcw className="w-3 h-3" />
                         <span>Undo</span>
                       </button>
                     ) : (
-                      <span className="text-xs font-bold text-green-500 bg-green-950/60 border border-green-800/80 px-2.5 py-1 rounded-lg">
-                        Given
+                      <span className="text-xs font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
+                        Delivered
                       </span>
                     )
                   ) : (
                     <button
                       onClick={() => handleGiveSnack(team)}
-                      className="bg-[#ff7a1a] hover:bg-[#e5680d] active:scale-[0.98] text-black font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm shadow-[#ff7a1a]/20"
+                      className="bg-[#ff7a1a] hover:bg-[#e5680d] active:scale-[0.96] text-black font-extrabold text-xs px-3.5 py-1.5 rounded-xl shadow-md shadow-[#ff7a1a]/20 transition-all"
                     >
-                      Give
+                      Give Snack
                     </button>
                   )}
                 </div>
@@ -463,7 +479,7 @@ export default function SnacksDashboard() {
       {/* Admin Undo Modal */}
       {undoModal && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5 shadow-2xl relative">
+          <div className="w-full max-w-sm bg-[#121212] border border-white/15 rounded-2xl p-5 shadow-2xl relative">
             <h2 className="text-base font-bold text-white">Undo Snack Delivery</h2>
             <p className="text-xs text-neutral-400 mt-1">
               Team: <span className="text-white font-semibold">{undoModal.name}</span> ({undoModal.id})
@@ -483,10 +499,11 @@ export default function SnacksDashboard() {
                 <input
                   type="text"
                   required
+                  autoFocus
                   value={undoReason}
                   onChange={(e) => setUndoReason(e.target.value)}
                   placeholder="e.g. Accidental scan"
-                  className="w-full bg-[#1c1c1c] border border-[#333] rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full bg-[#181818] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#ff7a1a]"
                 />
               </div>
 
@@ -494,7 +511,7 @@ export default function SnacksDashboard() {
                 <button
                   type="button"
                   onClick={() => setUndoModal(null)}
-                  className="flex-1 bg-[#202020] text-neutral-300 font-semibold py-2.5 rounded-xl text-xs"
+                  className="flex-1 bg-[#1e1e1e] hover:bg-[#252525] text-neutral-300 font-semibold py-2.5 rounded-xl text-xs"
                 >
                   Cancel
                 </button>
@@ -513,7 +530,7 @@ export default function SnacksDashboard() {
       {/* New Slot Modal */}
       {newSlotModal && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5 shadow-2xl relative">
+          <div className="w-full max-w-sm bg-[#121212] border border-white/15 rounded-2xl p-5 shadow-2xl relative">
             <h2 className="text-base font-bold text-white">Create New Snack Slot</h2>
 
             <form onSubmit={handleCreateSlot} className="space-y-4 mt-4">
@@ -524,10 +541,11 @@ export default function SnacksDashboard() {
                 <input
                   type="text"
                   required
+                  autoFocus
                   value={newSlotName}
                   onChange={(e) => setNewSlotName(e.target.value)}
                   placeholder="e.g. Morning Breakfast"
-                  className="w-full bg-[#1c1c1c] border border-[#333] rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full bg-[#181818] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#ff7a1a]"
                 />
               </div>
 
@@ -535,15 +553,15 @@ export default function SnacksDashboard() {
                 <button
                   type="button"
                   onClick={() => setNewSlotModal(false)}
-                  className="flex-1 bg-[#202020] text-neutral-300 font-semibold py-2.5 rounded-xl text-xs"
+                  className="flex-1 bg-[#1e1e1e] hover:bg-[#252525] text-neutral-300 font-semibold py-2.5 rounded-xl text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#ff7a1a] text-black font-bold py-2.5 rounded-xl text-xs shadow-md"
+                  className="flex-1 bg-[#ff7a1a] hover:bg-[#e5680d] text-black font-extrabold py-2.5 rounded-xl text-xs shadow-md"
                 >
-                  Create
+                  Create Slot
                 </button>
               </div>
             </form>
@@ -553,4 +571,3 @@ export default function SnacksDashboard() {
     </div>
   );
 }
-
