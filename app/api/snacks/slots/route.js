@@ -32,3 +32,4 @@ export async function POST(request) {
     return NextResponse.json({ error: err.message || 'Could not create slot.' }, { status: 500 });
   }
 }
+

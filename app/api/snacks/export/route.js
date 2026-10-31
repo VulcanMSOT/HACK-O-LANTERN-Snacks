@@ -16,7 +16,7 @@ export async function GET(request) {
         t.id AS team_id,
         t.name AS team_name,
         sg.given_by,
-        sg.created_at AS given_at,
+        sg.given_at,
         CASE WHEN sg.id IS NOT NULL THEN 'Given' ELSE 'Pending' END AS status
       FROM teams t
       LEFT JOIN snack_given sg ON sg.team_id = t.id AND sg.slot_id = $1
@@ -48,3 +48,4 @@ export async function GET(request) {
     return NextResponse.json({ error: err.message || 'Could not export CSV.' }, { status: 500 });
   }
 }
+

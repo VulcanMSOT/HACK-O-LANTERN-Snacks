@@ -15,7 +15,7 @@ export async function GET(request) {
         t.normalised_name,
         sg.id AS snack_given_id,
         sg.given_by,
-        sg.created_at AS given_at,
+        sg.given_at,
         CASE WHEN sg.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_given
       FROM teams t
       LEFT JOIN snack_given sg ON sg.team_id = t.id AND sg.slot_id = $1
@@ -37,7 +37,10 @@ export async function GET(request) {
       teams,
     });
   } catch (err) {
-    console.error('Fetch snack teams error:', err);
-    return NextResponse.json({ error: err.message || 'Could not load teams.' }, { status: 500 });
+    if (err.status !== 401) {
+      console.error('Fetch snack teams error:', err);
+    }
+    return NextResponse.json({ error: err.message || 'Could not load teams.' }, { status: err.status || 500 });
   }
 }
+

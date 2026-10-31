@@ -25,7 +25,7 @@ export async function POST(request) {
       const insertRes = await pool.query(
         `INSERT INTO snack_given (slot_id, team_id, given_by)
          VALUES ($1, $2, $3)
-         RETURNING id, created_at`,
+         RETURNING id, given_at`,
         [numSlotId, cleanTeamId, user.name || 'Volunteer']
       );
 
@@ -49,3 +49,4 @@ export async function POST(request) {
     return NextResponse.json({ error: err.message || 'Could not record snack.' }, { status: 500 });
   }
 }
+

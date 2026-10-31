@@ -399,16 +399,16 @@ export default function SnacksDashboard() {
                     : 'bg-[#141414] border-[#262626] hover:border-[#ff7a1a]/40'
                 }`}
               >
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-mono text-xs font-bold text-[#ff7a1a]">{team.id}</span>
-                    <span className="text-xs font-bold text-white">{team.name}</span>
+                <div className="flex-1 min-w-0 mr-2">
+                  <div className="flex items-center space-x-2 flex-wrap gap-y-0.5">
+                    <span className="font-mono text-xs font-bold text-[#ff7a1a] flex-shrink-0">{team.id}</span>
+                    <span className="text-xs sm:text-sm font-bold text-white break-words">{team.name}</span>
                   </div>
 
                   <div className="mt-1">
                     {team.is_given ? (
-                      <span className="text-[11px] text-green-400 flex items-center space-x-1">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="text-[11px] text-green-400 flex items-center space-x-1 break-words">
+                        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
                         <span>
                           Given by {team.given_by} at{' '}
                           {new Date(team.given_at).toLocaleTimeString([], {
@@ -419,14 +419,14 @@ export default function SnacksDashboard() {
                       </span>
                     ) : (
                       <span className="text-[11px] text-neutral-400 flex items-center space-x-1">
-                        <Clock className="w-3 h-3 text-neutral-500" />
+                        <Clock className="w-3 h-3 text-neutral-500 flex-shrink-0" />
                         <span>Awaiting delivery</span>
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div>
+                <div className="flex-shrink-0">
                   {team.is_given ? (
                     user.role === 'admin' ? (
                       <button
@@ -553,3 +553,4 @@ export default function SnacksDashboard() {
     </div>
   );
 }
+

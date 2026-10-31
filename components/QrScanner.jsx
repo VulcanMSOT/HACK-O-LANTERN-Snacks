@@ -10,12 +10,12 @@ export default function QrScanner({ onScan, onClose }) {
   const elementId = 'qr-snacks-container';
 
   useEffect(() => {
-    let html5QrCode;
+    let isMounted = true;
 
     const startScanner = async () => {
       try {
-        html5QrCode = new Html5Qrcode(elementId);
-        scannerRef.current = html5QrCode;
+        const qr = new Html5Qrcode(elementId);
+        scannerRef.current = qr;
 
         const config = {
           fps: 10,
@@ -23,16 +23,28 @@ export default function QrScanner({ onScan, onClose }) {
           aspectRatio: 1.0,
         };
 
-        await html5QrCode.start(
+        await qr.start(
           { facingMode: 'environment' },
           config,
           (decodedText) => {
-            if (navigator.vibrate) navigator.vibrate(50);
-            onScan(decodedText);
+            if (isMounted) {
+              if (navigator.vibrate) navigator.vibrate(50);
+              onScan(decodedText);
+            }
           },
           () => {}
         );
+
+        if (!isMounted) {
+          try {
+            if (qr.isScanning) {
+              await qr.stop();
+            }
+            qr.clear();
+          } catch (e) {}
+        }
       } catch (err) {
+        if (!isMounted) return;
         console.error('Camera init error:', err);
         setError('Camera permission denied or camera not found. Please use manual team search.');
       }
@@ -41,13 +53,22 @@ export default function QrScanner({ onScan, onClose }) {
     startScanner();
 
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current
-          .stop()
-          .catch(() => {})
-          .finally(() => {
-            scannerRef.current?.clear?.();
-          });
+      isMounted = false;
+      const qr = scannerRef.current;
+      if (qr) {
+        try {
+          if (qr.isScanning) {
+            qr.stop()
+              .then(() => {
+                try { qr.clear(); } catch (e) {}
+              })
+              .catch(() => {});
+          } else {
+            try { qr.clear(); } catch (e) {}
+          }
+        } catch (e) {
+          // Synchronous safety catch
+        }
       }
     };
   }, [onScan]);
@@ -86,3 +107,4 @@ export default function QrScanner({ onScan, onClose }) {
     </div>
   );
 }
+
