@@ -123,51 +123,57 @@ export default function SnacksDashboard() {
   }, [teams, search, filter]);
 
   // Give Snack Action
-  const handleGiveSnack = async (team) => {
-    try {
-      const res = await fetch('/api/snacks/give', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slotId: selectedSlotId, teamId: team.id }),
-      });
+  const handleGiveSnack = useCallback(
+    async (team) => {
+      try {
+        const res = await fetch('/api/snacks/give', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slotId: selectedSlotId, teamId: team.id }),
+        });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to record snack');
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to record snack');
+        }
+
+        showToast(`Snack recorded for ${team.name}!`);
+        fetchTeams(selectedSlotId);
+      } catch (err) {
+        alert(err.message);
       }
-
-      showToast(`Snack recorded for ${team.name}!`);
-      fetchTeams(selectedSlotId);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+    },
+    [selectedSlotId, fetchTeams]
+  );
 
   // Handle QR Scan
-  const handleQrScan = (decodedText) => {
-    setScannerOpen(false);
-    const raw = String(decodedText || '').trim();
-    const clean = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const handleQrScan = useCallback(
+    (decodedText) => {
+      setScannerOpen(false);
+      const raw = String(decodedText || '').trim();
+      const clean = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    const match = teams.find(
-      (t) =>
-        t.name.toLowerCase() === raw.toLowerCase() ||
-        t.normalised_name.replace(/[^a-z0-9]/g, '') === clean ||
-        t.id.toLowerCase() === raw.toLowerCase()
-    );
+      const match = teams.find(
+        (t) =>
+          t.name.toLowerCase() === raw.toLowerCase() ||
+          t.normalised_name?.replace(/[^a-z0-9]/g, '') === clean ||
+          t.id.toLowerCase() === raw.toLowerCase()
+      );
 
-    if (match) {
-      if (match.is_given) {
-        alert(`${match.name} (${match.id}) has ALREADY received snacks for this slot!`);
-      } else {
-        if (confirm(`Confirm snack distribution for ${match.name} (${match.id})?`)) {
-          handleGiveSnack(match);
+      if (match) {
+        if (match.is_given) {
+          alert(`${match.name} (${match.id}) has ALREADY received snacks for this slot!`);
+        } else {
+          if (confirm(`Confirm snack distribution for ${match.name} (${match.id})?`)) {
+            handleGiveSnack(match);
+          }
         }
+      } else {
+        alert(`Scanned "${raw}" could not be matched to an active team.`);
       }
-    } else {
-      alert(`Scanned "${raw}" could not be matched to an active team.`);
-    }
-  };
+    },
+    [teams, handleGiveSnack]
+  );
 
   // Undo Snack Action
   const handleUndoSubmit = async (e) => {

@@ -7,10 +7,43 @@ import { Camera, X } from 'lucide-react';
 export default function QrScanner({ onScan, onClose }) {
   const [error, setError] = useState('');
   const scannerRef = useRef(null);
+  const onScanRef = useRef(onScan);
   const elementId = 'qr-snacks-container';
 
   useEffect(() => {
+    onScanRef.current = onScan;
+  }, [onScan]);
+
+  useEffect(() => {
     let isMounted = true;
+
+    // Global guard against uncaught html5-qrcode library rejections
+    const handleRejection = (event) => {
+      const msg = String(event?.reason || '');
+      if (msg.includes('Cannot stop') || msg.includes('scanner is not running')) {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+      }
+    };
+    window.addEventListener('unhandledrejection', handleRejection);
+
+    const safeStop = async (qr) => {
+      if (!qr) return;
+      try {
+        const state = typeof qr.getState === 'function' ? qr.getState() : null;
+        // Html5QrcodeScannerState: SCANNING = 2, PAUSED = 3
+        if (state === 2 || state === 3 || qr.isScanning) {
+          await qr.stop().catch(() => {});
+        }
+      } catch (err) {
+        // Silently swallow any synchronous throw
+      }
+      try {
+        qr.clear();
+      } catch (err) {
+        // Silently swallow clear errors
+      }
+    };
 
     const startScanner = async () => {
       try {
@@ -29,19 +62,16 @@ export default function QrScanner({ onScan, onClose }) {
           (decodedText) => {
             if (isMounted) {
               if (navigator.vibrate) navigator.vibrate(50);
-              onScan(decodedText);
+              if (onScanRef.current) {
+                onScanRef.current(decodedText);
+              }
             }
           },
           () => {}
         );
 
         if (!isMounted) {
-          try {
-            if (qr.isScanning) {
-              await qr.stop();
-            }
-            qr.clear();
-          } catch (e) {}
+          await safeStop(qr);
         }
       } catch (err) {
         if (!isMounted) return;
@@ -50,28 +80,17 @@ export default function QrScanner({ onScan, onClose }) {
       }
     };
 
-    startScanner();
+    startScanner().catch(() => {});
 
     return () => {
       isMounted = false;
+      window.removeEventListener('unhandledrejection', handleRejection);
       const qr = scannerRef.current;
       if (qr) {
-        try {
-          if (qr.isScanning) {
-            qr.stop()
-              .then(() => {
-                try { qr.clear(); } catch (e) {}
-              })
-              .catch(() => {});
-          } else {
-            try { qr.clear(); } catch (e) {}
-          }
-        } catch (e) {
-          // Synchronous safety catch
-        }
+        safeStop(qr).catch(() => {});
       }
     };
-  }, [onScan]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
@@ -107,4 +126,3 @@ export default function QrScanner({ onScan, onClose }) {
     </div>
   );
 }
-
